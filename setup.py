@@ -19,9 +19,9 @@ setup(name="otsopy",
       - Rdflib to manage the semantic information.
       - XXX to expose HTTP RESTfull services.
       """,
-      author="Aitor Gomez-Goiri",
-      author_email="aitor.gomez@deusto.es",
-      maintainer = "Aitor Gomez-Goiri"
+      author = "Aitor Gomez-Goiri",
+      author_email = "aitor.gomez@deusto.es",
+      maintainer = "Aitor Gomez-Goiri",
       maintainer_email = "aitor.gomez@deusto.es",
       url = "http://github.com/gomezgoiri/otsoPy",
       packages = ["otsopy"],
