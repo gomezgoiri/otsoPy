@@ -63,6 +63,16 @@ class TestStore(unittest.TestCase):
         contexts = list(self.store.graphs.contexts())
         self.assertEquals(2, len(contexts))
         self.assertItemsIsomorphic( [self.graphs[0], self.graphs[2],], contexts)
+    
+    def test_read_uri(self):
+        uris = []
+        uris.append( self.store.write(self.graphs[0]) )
+        uris.append( self.store.write(self.graphs[1]) )
+        uris.append( self.store.write(self.graphs[2]) )
+        
+        for uri, expected in zip(uris, self.graphs):
+            graph = self.store.read_uri(uri)
+            self.assertTrue( graph.isomorphic(expected) )
 
 
 if __name__ == "__main__":
