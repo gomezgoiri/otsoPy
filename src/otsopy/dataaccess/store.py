@@ -62,7 +62,7 @@ class Store(object):
             if new_uri in filter(lambda n: n.identifier!=new_uri, self.graphs.contexts()):
                 continue
             
-            gr = Graph(self.graphs.store, URIRef(new_uri))
+            gr = self.graphs.get_context(new_uri) #Graph(self.graphs.store, new_uri)
             gr += graph
             return new_uri
     
@@ -77,7 +77,7 @@ class Store(object):
 
     @locked
     def read_uri(self, uri):
-        ret = Graph(self.graphs.store, URIRef(uri))
+        ret = Graph(self.graphs.store, uri)
         return deepcopy(ret) if ret else None
 
     @locked
@@ -87,19 +87,26 @@ class Store(object):
 
     @locked
     def take_uri(self, uri):
+        ret = None
         try:
-            context = URIRef(uri)
-            ret = Graph(self.graphs.store, context)
-            self.graphs.remove_context(context)
+            #context = URIRef(uri)
+            #ret = Graph(self.graphs.store, uri)
+            to_delete = self.graphs.get_context(uri)
+            ret = deepcopy(to_delete)
+            self.graphs.remove_context(to_delete)
         except KeyError:
             return None
-        return deepcopy(ret) if ret else None
+        return ret if len(ret)>0 else None
 
     @locked
     def take_wildcard(self, subject, predicate, obj):
+        ret = None
         try:
-            ret = self._find_graph(subject, predicate, obj)
-            self.graphs.remove_context(ret.identifier)
+            to_delete = self._find_graph(subject, predicate, obj)
+            if to_delete is not None:
+                ret = deepcopy(to_delete)
+                to_delete.serialize(format="n3")
+                self.graphs.remove_context(to_delete)
         except KeyError:
             return None
         return ret
@@ -113,6 +120,6 @@ class Store(object):
 
     def _find_graph(self, subject, predicate, obj):
         for graph in self.graphs.contexts(): #(subject, predicate, obj)):
-            for t in graph.triples((subject, predicate, obj)):
+            for _ in graph.triples((subject, predicate, obj)):
                 return graph # if it has at least a triple matching that triple, we return the graph
         return None
