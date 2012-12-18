@@ -29,20 +29,17 @@ class TestStore(unittest.TestCase):
         return (self.generate_random_URI(), self.generate_random_URI(), self.generate_random_URI())
 
     def setUp(self):
-        self.triples = []
-        
-        self.triples.append( [self.generate_random_triple() for _ in range(10)] )
-        self.triples.append( [self.generate_random_triple() for _ in range(10)] )
-        self.triples.append( [self.generate_random_triple() for _ in range(10)] )
-        
         self.graphs = []
-        i = 0
-        for tripls in self.triples:
+        for i in range(3):
             graph = Graph()
-            for t in tripls:
-                graph.add(t)
+            for _ in range(10):
+                graph.add(self.generate_random_triple())
             graph.add( self.generate_recognizable_triple(i) )
-            i += 1
+            
+            graph.add( ( URIRef( RECOGNIZABLE_SUBJECT%(404) ), # always the same
+                         URIRef( RECOGNIZABLE_PREDICATE%(400+(i%2)) ), # 0 repeats twice
+                         URIRef( RECOGNIZABLE_OBJECT%(401+i) ) ) ) # to test query
+            
             self.graphs.append(graph)
         
         self.store = Store()
@@ -139,6 +136,25 @@ class TestStore(unittest.TestCase):
         self.assert_takes_wildcard( self.graphs[0], URIRef(RECOGNIZABLE_SUBJECT%(0)), None, None )        
         self.assert_takes_wildcard( self.graphs[1], None, URIRef(RECOGNIZABLE_PREDICATE%(1)), None )
         self.assert_takes_wildcard( self.graphs[2], None, None, URIRef(RECOGNIZABLE_OBJECT%(2)) )
+            
+        # TODO try other combinations
+        # TODO try with 2 or more graphs matching a template
+        
+    def assert_number_responses(self, expected_number_of_responses, *wildcard):
+        self.assertEquals( expected_number_of_responses, len(self.store.query_wildcard(*wildcard)) )        
+
+    def test_query_wildcard(self):
+        self.store.write(self.graphs[0])
+        self.store.write(self.graphs[1])
+        self.store.write(self.graphs[2])
+        
+        self.assert_number_responses( 1, URIRef(RECOGNIZABLE_SUBJECT%(0)), None, None )        
+        self.assert_number_responses( 1, None, URIRef(RECOGNIZABLE_PREDICATE%(1)), None )
+        self.assert_number_responses( 1, None, None, URIRef(RECOGNIZABLE_OBJECT%(2)) )
+        
+        self.assert_number_responses( 3, URIRef(RECOGNIZABLE_SUBJECT%(404)), None, None )        
+        self.assert_number_responses( 2, None, URIRef(RECOGNIZABLE_PREDICATE%(400)), None )
+        self.assert_number_responses( 1, None, None, URIRef(RECOGNIZABLE_OBJECT%(402)) )
             
         # TODO try other combinations
         # TODO try with 2 or more graphs matching a template
