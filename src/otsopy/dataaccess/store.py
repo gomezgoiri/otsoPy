@@ -21,34 +21,50 @@ class DataAccess(object):
             raise Exception("Space '%s' does not exist." % space)
         return self.stores[space]
     
+    def join_space(self, space):
+        """Joins the *space* identified by an URI."""
+        pass
+    
+    def leave_space(self, space):
+        """Leaves a *space* identified by an URI."""
+        pass
+            
     def write(self, triples, space=None):
+        """Writes a set of triples into a space."""
         store = self.getSpace(space)
         return store.write(triples)
         
     def read_uri(self, uri, space=None):
+        """Reads the graph identified by an *uri* from the *space*.
+        If such graph does not exist, it returns *None*."""
         store = self.getSpace(space)
         return store.read_uri(uri)
     
     def read_wildcard(self, subject, predicate, obj, space=None):
+        """Reads a graph with a triple which matches a *template* from the *space*.
+        This operation is non deterministic and returns *None* when no graph is found."""
         store = self.getSpace(space)
         return store.read_wildcard(subject, predicate, obj)
     
     def take_uri(self, uri, space=None):
+        """Reads and removes a graph from the space."""
         store = self.getSpace(space)
         return store.take_uri(uri)
     
     def take_wildcard(self, subject, predicate, obj, space=None):
+        """Reads and removes a graph from the space."""
         store = self.getSpace(space)
         return store.take_wildcard(subject, predicate, obj)
     
     def query_wildcard(self, subject, predicate, obj, space=None):
+        """Returns all the triples in a *space* which match the *template*."""
         store = self.getSpace(space)
         return store.query_wildcard(subject, predicate, obj)
 
 
 class Store(object):
-    def __init__(self):
-        self.graphs = ConjunctiveGraph(store='default')
+    def __init__(self, store='default'):
+        self.graphs = ConjunctiveGraph(store)
         self._lock = threading.RLock()
 
     @locked
