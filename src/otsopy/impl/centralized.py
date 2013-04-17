@@ -2,6 +2,7 @@
 Triple space implementation which manages the space in a single node (centralized).
 """
 from otsopy.triplespace import TripleSpace
+from otsopy.dataaccess.store import DataAccess
 
 class ServerCentralizedKernel(TripleSpace):
     """
@@ -10,8 +11,13 @@ class ServerCentralizedKernel(TripleSpace):
     
     def __init__(self):
         super(ServerCentralizedKernel, self).__init__()
+        self.data_access = DataAccess() 
+        self._create_server()
+        
+    def _create_server(self):
         from otsopy.network.communication.server import app
         self.app = app
+        self.app.kernel = self
     
     def join_space(self, space):
         pass
@@ -20,7 +26,7 @@ class ServerCentralizedKernel(TripleSpace):
         pass
     
     def get_spaces(self):
-        pass
+        return str( self.data_access.get_spaces() )
     
     def read_uri(self, graph, space=None):
         pass
