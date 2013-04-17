@@ -10,6 +10,8 @@ class ServerCentralizedKernel(TripleSpace):
     
     def __init__(self):
         super(ServerCentralizedKernel, self).__init__()
+        from otsopy.network.communication.server import app
+        self.app = app
     
     def join_space(self, space):
         pass
