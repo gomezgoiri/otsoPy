@@ -10,55 +10,58 @@ from otsopy.dataaccess.util import locked
 class DataAccess(object):
     def __init__(self, defaultSpace="http://www.morelab.deusto.es"):
         self.stores = {}
-        self.__defaultSpace = defaultSpace
+        self._defaultSpace = defaultSpace
         if defaultSpace is not None:
             self.stores[defaultSpace] = Store() # join not implemented yet
     
-    def getSpace(self, space):
+    def get_space(self, space):
         if space == None:
-            space = self.__defaultSpace
+            space = self._defaultSpace
         if not self.stores.has_key(space):
             raise Exception("Space '%s' does not exist." % space)
         return self.stores[space]
     
+    def get_spaces(self):
+        return self.stores.keys()
+    
     def join_space(self, space):
         """Joins the *space* identified by an URI."""
-        pass
+        self.stores[space] = Store()
     
     def leave_space(self, space):
         """Leaves a *space* identified by an URI."""
-        pass
+        del self.stores[space]
             
     def write(self, triples, space=None):
         """Writes a set of triples into a space."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.write(triples)
         
     def read_uri(self, uri, space=None):
         """Reads the graph identified by an *uri* from the *space*.
         If such graph does not exist, it returns *None*."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.read_uri(uri)
     
     def read_wildcard(self, subject, predicate, obj, space=None):
         """Reads a graph with a triple which matches a *template* from the *space*.
         This operation is non deterministic and returns *None* when no graph is found."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.read_wildcard(subject, predicate, obj)
     
     def take_uri(self, uri, space=None):
         """Reads and removes a graph from the space."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.take_uri(uri)
     
     def take_wildcard(self, subject, predicate, obj, space=None):
         """Reads and removes a graph from the space."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.take_wildcard(subject, predicate, obj)
     
     def query_wildcard(self, subject, predicate, obj, space=None):
         """Returns all the triples in a *space* which match the *template*."""
-        store = self.getSpace(space)
+        store = self.get_space(space)
         return store.query_wildcard(subject, predicate, obj)
 
 

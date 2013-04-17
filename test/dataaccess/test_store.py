@@ -8,11 +8,36 @@ import random
 
 from copy import deepcopy
 from rdflib import URIRef, Graph
-from otsopy.dataaccess.store import Store
+from otsopy.dataaccess.store import Store, DataAccess
 
 RECOGNIZABLE_SUBJECT ="http://subject_%d"
 RECOGNIZABLE_PREDICATE = "http://predicate_%d"
 RECOGNIZABLE_OBJECT =  "http://object_%d"
+
+
+class TestDataAccess(unittest.TestCase):
+    
+    def setUp(self):
+        self.da = DataAccess()
+        
+    def test_get_space(self):
+        self.assertIsNotNone( self.da.get_space( self.da._defaultSpace ) )
+        self.assertRaises( Exception, self.da.get_space, "http://unexisting.space.com" )
+    
+    def test_join_space(self):
+        self.da.join_space( "http://www.space1.tk" )
+        self.assertIsNotNone( self.da.get_space("http://www.space1.tk") )
+        
+    def test_leave_space(self):
+        self.da.leave_space( self.da._defaultSpace )
+        self.assertRaises( Exception, self.da.get_space,  self.da._defaultSpace )
+        
+    def test_get_spaces(self):
+        self.da.join_space( "http://www.space1.tk" )
+        spaces = self.da.get_spaces()
+        self.assertEquals( 2, len(spaces) )
+        self.assertTrue( self.da._defaultSpace in spaces )
+        self.assertTrue( "http://www.space1.tk" in spaces )
 
 class TestStore(unittest.TestCase):
 
