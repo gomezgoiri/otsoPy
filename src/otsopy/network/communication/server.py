@@ -4,7 +4,8 @@ Created on Dec 25, 2012
 @author: tulvur
 '''
 
-from flask import Flask, request, jsonify
+import urllib
+from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 def request_wants_json():
@@ -23,7 +24,14 @@ def get_spaces():
     spaces = app.kernel.get_spaces()
     if request_wants_json():
         return jsonify( spaces = spaces )
-    return "Hello World" # render_template('show_items.html', items=items)
+    
+    html_spaces = []
+    for space in spaces:
+        element = {}
+        element['name'] = space
+        element['url'] = "spaces/%s" % urllib.quote_plus(space) 
+        html_spaces.append( element )
+    return render_template('spaces.html', spaces = html_spaces )
 
 @app.route('/spaces/<path:space>')
 def get_space(space):

@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>Spaces</title>
+    <meta content="">
+    <style></style>
+  </head>
+  <body>
+    <p>This node is joined to the following spaces:</p>
+    <ul>
+    {% for space in spaces %}
+	<li><a href="{{ space.url }}">{{ space.name }}</li>
+    {% endfor %}
+    </ul>
+  </body>
+</html>

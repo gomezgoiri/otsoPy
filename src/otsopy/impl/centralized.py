@@ -26,7 +26,7 @@ class ServerCentralizedKernel(TripleSpace):
         pass
     
     def get_spaces(self):
-        return str( self.data_access.get_spaces() )
+        return self.data_access.get_spaces()
     
     def read_uri(self, graph, space=None):
         pass
@@ -68,3 +68,9 @@ class ClientCentralizedKernel(TripleSpace):
     
     def write(self, triples, space=None):
         pass
+
+if __name__ == '__main__':
+    sc = ServerCentralizedKernel()
+    sc.app.debug = True
+    sc.app.run()
+    #app.run(host='0.0.0.0')
