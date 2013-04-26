@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>Space {{ space }}</title>
+    <meta content="">
+    <style></style>
+  </head>
+  <body>
+    <p>This node has the following graphs for this space:</p>
+    <ul>
+    {% for graph in graphs %}
+	<li><a href="{{ graph.url }}">{{ graph.name }}</li>
+    {% else %}
+    <li>No graphs (it is empty)</li>
+	{% endfor %}
+    </ul>
+  </body>
+</html>

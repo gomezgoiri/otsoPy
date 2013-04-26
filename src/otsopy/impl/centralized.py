@@ -20,13 +20,16 @@ class ServerCentralizedKernel(TripleSpace):
         self.app.kernel = self
     
     def join_space(self, space):
-        pass
+        self.data_access.join_space(space)
     
     def leave_space(self, space):
-        pass
+        self.data_access.leave_space(space)
     
     def get_spaces(self):
         return self.data_access.get_spaces()
+    
+    def get_graph_uris(self, space):
+        return self.data_access.get_graph_uris(space)
     
     def read_uri(self, graph, space=None):
         pass
@@ -38,7 +41,7 @@ class ServerCentralizedKernel(TripleSpace):
         pass
     
     def write(self, triples, space=None):
-        pass
+        return self.data_access.write(triples, space=space)
 
 class ClientCentralizedKernel(TripleSpace):
     """

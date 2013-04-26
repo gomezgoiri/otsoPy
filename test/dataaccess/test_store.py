@@ -100,6 +100,20 @@ class TestStore(unittest.TestCase):
         self.assertEquals(2, len(contexts))
         self.assertItemsIsomorphic( [self.graphs[0], self.graphs[2],], contexts)
     
+    def test_get_graph_uris(self):
+        expected = []
+        
+        self.assertFalse( list(self.store.get_graph_uris()) )
+        
+        expected.append( self.store.write(self.graphs[0]) )
+        self.assertItemsEqual( self.store.get_graph_uris(), expected )
+        
+        expected.append( self.store.write(self.graphs[1]) )
+        self.assertItemsEqual( self.store.get_graph_uris(), expected )
+        
+        expected.append( self.store.write(self.graphs[2]) )
+        self.assertItemsEqual( self.store.get_graph_uris(), expected )
+    
     def test_read_uri(self):
         uris = []
         uris.append( self.store.write(self.graphs[0]) )

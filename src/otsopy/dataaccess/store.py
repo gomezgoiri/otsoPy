@@ -31,6 +31,10 @@ class DataAccess(object):
     def leave_space(self, space):
         """Leaves a *space* identified by an URI."""
         del self.stores[space]
+    
+    def get_graph_uris(self, space=None):
+        store = self.get_space(space)
+        return store.get_graph_uris()
             
     def write(self, triples, space=None):
         """Writes a set of triples into a space."""
@@ -72,8 +76,12 @@ class Store(object):
 
     @locked
     def _print(self):
-        print "Graph %r" % self.graphs                
-
+        print "Graph %r" % self.graphs
+    
+    @locked
+    def get_graph_uris(self):
+        return [ n.identifier for n in self.graphs.contexts() ]
+    
     def __write_graph(self, graph):
         self._lock.acquire()
         while True:
