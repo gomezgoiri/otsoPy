@@ -8,7 +8,7 @@ from otsopy.dataaccess.util import locked
 
 
 class DataAccess(object):
-    def __init__(self, defaultSpace="http://www.morelab.deusto.es"):
+    def __init__(self, defaultSpace="default"):
         self.stores = {}
         self._defaultSpace = defaultSpace
         if defaultSpace is not None:
@@ -85,13 +85,14 @@ class Store(object):
     def __write_graph(self, graph):
         self._lock.acquire()
         while True:
-            new_uri = URIRef('http://otsopack/%s' % random.randint(0, 1000))
-            if new_uri in filter(lambda n: n.identifier!=new_uri, self.graphs.contexts()):
+            #new_uri = URIRef('http://otsopack/%s' % random.randint(0, 1000))
+            new_id = str( random.randint(0, 1000) )
+            if new_id in filter(lambda n: n.identifier!=new_id, self.graphs.contexts()):
                 continue
             
-            gr = self.graphs.get_context(new_uri) #Graph(self.graphs.store, new_uri)
+            gr = self.graphs.get_context(new_id) #Graph(self.graphs.store, new_uri)
             gr += graph
-            return new_uri
+            return new_id
     
     @locked
     def write(self, triples):        
