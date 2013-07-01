@@ -74,6 +74,10 @@ class ClientCentralizedKernel(TripleSpace):
 
 if __name__ == '__main__':
     sc = ServerCentralizedKernel()
+    
+    from utils.testing import generate_random_graph
+    sc.write( generate_random_graph() )
+    
     sc.app.debug = True
     sc.app.run()
     #app.run(host='0.0.0.0')

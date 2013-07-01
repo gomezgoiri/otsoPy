@@ -9,6 +9,7 @@ import json
 import random
 from rdflib import URIRef, Graph
 
+from utils.testing import generate_random_graph
 from otsopy.impl.centralized import ServerCentralizedKernel
 
 
@@ -49,22 +50,8 @@ class TestServerCentralizedKernel(unittest.TestCase):
         response = self._get_url('/spaces')
         self.assertFalse( list(response["spaces"]) )
     
-    # todo encapsulate and avoid repetition!
-    def generate_random_URI(self):
-        domains = ("www.deusto.es", "www.morelab.deusto.es", "aitor.gomezgoiri.net")
-        return URIRef( "http://%s/%d"%(random.choice(domains), random.randint(0, 1000)) )
-
-    def generate_random_triple(self):
-        return (self.generate_random_URI(), self.generate_random_URI(), self.generate_random_URI())
-    
-    def generate_random_graph(self):
-        graph = Graph()
-        for _ in range(10):
-            graph.add(self.generate_random_triple())
-        return graph
-    
     def test_get_graph_uris(self):
-        graph_uri = self.kernel.write( self.generate_random_graph() )
+        graph_uri = self.kernel.write( generate_random_graph() )
         response = self._get_url('/spaces/%s/graphs' % urllib.quote_plus( self.kernel.data_access._defaultSpace )  )
         assert str(graph_uri) in response["graphs"]
 
