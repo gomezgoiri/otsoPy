@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Search by wildcard template in the space {{ space }}</title>
+    <meta content="">
+    <style></style>
+  </head>
+  <body>    
+    <p>Use the following search form to locate a graph in the space <a href="{{ space.url }}">{{ space.name }}</a>:</p>
+    <form method="get">
+		Subject: <input type="text" name="subject" /> <br />
+		Predicate: <input type="text" name="predicate" /> <br />
+		Object: <input type="text" name="object" />
+		Type:
+		<select name="xsd_type">
+			<option value="none">It's an URI!</option>
+			<option value="int">Integer</option>
+			<option value="float">Float</option>
+			<option value="boolean">Boolean</option>
+			<option value="date">Date</option>
+		</select><br />
+		
+		<input type="submit" value="Search">
+	</form>
+  </body>
+</html>

@@ -35,7 +35,7 @@ class ServerCentralizedKernel(TripleSpace):
         return self.data_access.read_uri(graph, space=space)
     
     def read_template(self, template, space=None):
-        pass
+        return self.data_access.read_wildcard(*template, space=space)
     
     def query(self, template, space=None):
         pass

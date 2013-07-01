@@ -5,7 +5,8 @@
     <style></style>
   </head>
   <body>
-    <p>This node has the following graphs for this space:</p>
+    <p>The space has the following graphs:</p>
+    
     <ul>
     {% for graph in graphs %}
 	<li><a href="{{ graph.url }}">{{ graph.name }}</a></li>
@@ -13,5 +14,7 @@
     <li>No graphs (it is empty)</li>
 	{% endfor %}
     </ul>
+    
+    <p>You can by look for a graph by its content using a <a href="graphs/wildcards">search form</a>.</p>
   </body>
 </html>
