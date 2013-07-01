@@ -8,6 +8,7 @@ import urllib
 from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
+# http://flask.pocoo.org/snippets/45/
 def request_wants_json():
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return best == 'application/json' and \
@@ -71,16 +72,44 @@ def get_graphs(space):
     for graph in graphs:
         element = {}
         element['name'] = graph
-        element['url'] = "spaces/%s/graphs/%s" % (space, urllib.quote_plus(graph)) 
+        element['url'] = "/spaces/%s/graphs/%s" % (urllib.quote_plus(space), urllib.quote_plus(graph)) 
         html_graphs.append( element )
-    print graphs
+    #print graphs
     return render_template('graphs.html', space = space, graphs = html_graphs )
 
 @app.route('/spaces/<path:space>/graphs/<path:graph>')
+# test: curl -Haccept:text/plain http://localhost:5000/spaces/default/graphs/1
 def get_graph(space, graph):
     """read({space},{graph})"""
-    return 'Graph %s in the space %s' % (graph, space)
-
+    #return 'Graph %s in the space %s' % (graph, space)
+    read_graph = app.kernel.read_uri( graph, space )
+    
+    if read_graph is None:
+        # 404
+        return "404 Not Found", 404
+    else:
+        best = request.accept_mimetypes.best_match(['text/n3', 'text/turtle', 'text/plain', 'text/html'])
+        
+        if best == 'text/html' or request.accept_mimetypes[best] <= request.accept_mimetypes['text/html']: # for  browsers sending */*
+            html_space = {}
+            html_space["name"] = space
+            html_space["url"] = "/spaces/%s"%space
+            
+            html_graph = {}
+            html_graph["name"] = graph
+            html_graph["content"] = read_graph.serialize(format="n3")
+            
+            return render_template('graph.html', space = html_space, graph = html_graph )
+        elif best == 'text/n3' :
+            # 'xml', 'n3', 'turtle', 'nt', 'pretty-xml', trix' are built in.
+            return read_graph.serialize(format="n3")
+        elif best == 'text/turtle':
+            return read_graph.serialize(format="turtle")
+        elif best == 'text/plain':
+            return read_graph.serialize(format="nt")
+        else:
+            return "406 Not Acceptable", 406
+    
 if __name__ == '__main__':
     app.debug = True
     app.run()

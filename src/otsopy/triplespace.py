@@ -10,7 +10,7 @@ class TripleSpace(object):
     __metaclass__ = ABCMeta
     
     def __init__(self):
-        self.default_space = "http://www.morelab.deusto.es"
+        self.default_space = "default" # "http://www.morelab.deusto.es"
     
     def join_space(self, space):
         """Joins the *space* identified by an URI."""

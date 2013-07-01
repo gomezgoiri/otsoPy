@@ -32,7 +32,7 @@ class ServerCentralizedKernel(TripleSpace):
         return self.data_access.get_graph_uris(space)
     
     def read_uri(self, graph, space=None):
-        pass
+        return self.data_access.read_uri(graph, space=space)
     
     def read_template(self, template, space=None):
         pass

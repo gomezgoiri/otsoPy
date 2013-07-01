@@ -8,7 +8,7 @@
     <p>This node has the following graphs for this space:</p>
     <ul>
     {% for graph in graphs %}
-	<li><a href="{{ graph.url }}">{{ graph.name }}</li>
+	<li><a href="{{ graph.url }}">{{ graph.name }}</a></li>
     {% else %}
     <li>No graphs (it is empty)</li>
 	{% endfor %}
