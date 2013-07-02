@@ -6,7 +6,9 @@ Created on Jul 2, 2013
 
 import urllib
 from flask import jsonify, render_template, request
+from otsopy.network.communication.server import Routes
 from otsopy.network.communication.view.utils import _request_wants_json
+
 
 def render_graphs(app, space, graphs):
     if _request_wants_json():
@@ -16,7 +18,9 @@ def render_graphs(app, space, graphs):
     for graph in graphs:
         element = {}
         element['name'] = graph
-        element['url'] = "/spaces/%s/graphs/%s" % (urllib.quote_plus(space), urllib.quote_plus(graph))
+        element['url'] = str(Routes.GRAPH).\
+                            replace('<path:space>', urllib.quote_plus(space)).\
+                            replace('<path:graph>', urllib.quote_plus(graph))
         html_graphs.append( element )
     #print graphs
     return render_template('graphs.html', space = space, graphs = html_graphs )
@@ -33,7 +37,7 @@ def render_graph(space, graph_id, graph):
     if best == 'text/html' or request.accept_mimetypes[best] <= request.accept_mimetypes['text/html']: # for  browsers sending */*
         html_space = {}
         html_space["name"] = space
-        html_space["url"] = "/spaces/%s"%space
+        html_space["url"] = str(Routes.SPACE).replace('<path:space>', space)
         
         html_graph = {}
         html_graph["name"] = graph_id

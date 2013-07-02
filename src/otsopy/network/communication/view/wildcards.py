@@ -7,6 +7,8 @@ Created on Jul 2, 2013
 import urllib
 from rdflib import URIRef
 from flask import request, redirect, render_template
+from otsopy.network.communication.server import Routes
+
 
 def http_arguments_to_wildcard_template(subject, predicate, obj):
     template = [None, None, None]
@@ -33,11 +35,11 @@ def get_redirection_url_piece_if_needed( arguments ):
         pred_param = "*" if pred_param == "" else urllib.quote_plus(pred_param)
                 
         if xsd_type != "none" and obj_param != "":
-            return "/%s/%s/%s/%s" % ( subj_param, pred_param, xsd_type, obj_param )
+            return "%s/%s/%s/%s" % ( subj_param, pred_param, xsd_type, obj_param )
         else:
             obj_param = "*" if obj_param == "" else urllib.quote_plus(obj_param)
             #if obj_param == "": obj_param = "*"
-            return "/%s/%s/%s" % ( subj_param, pred_param, obj_param )            
+            return "%s/%s/%s" % ( subj_param, pred_param, obj_param )            
     #return None # implicit
 
 def render_wildcard_graph( space, read_graph ):
@@ -45,7 +47,8 @@ def render_wildcard_graph( space, read_graph ):
         # 404
         return "404 Not Found", 404
     else:
-        return redirect( '/spaces/%s/graphs/%s' % (space, read_graph.identifier) )
+        return redirect( str(Routes.GRAPH).replace('<path:space>', space).\
+                                            replace('<path:graph>', read_graph.identifier) )
 
 def render_search_by_wildcard( space ):
     redirection_url_piece = get_redirection_url_piece_if_needed( request.args )
@@ -54,5 +57,5 @@ def render_search_by_wildcard( space ):
     
     html_space = {}
     html_space["name"] = space 
-    html_space["url"] = "/spaces/%s" % space
+    html_space["url"] = str(Routes.SPACE).replace('<path:space>', space)
     return render_template('wildcard.html', space = html_space )
