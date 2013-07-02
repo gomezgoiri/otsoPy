@@ -38,7 +38,7 @@ class ServerCentralizedKernel(TripleSpace):
         return self.data_access.read_wildcard(*template, space=space)
     
     def query(self, template, space=None):
-        pass
+        return self.data_access.query_wildcard(*template, space=space)
     
     def write(self, triples, space=None):
         return self.data_access.write(triples, space=space)
