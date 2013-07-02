@@ -35,7 +35,7 @@ class TestServerCentralizedKernel(unittest.TestCase):
     # e.g. curl -X GET http://127.0.0.1:5000/spaces/http%3A%2F%2Fwww.morelab.deusto.es -H "Accept: application/json"
     def test_default_space_joined(self):
         response = self._get_url('/spaces')
-        assert 'http://www.morelab.deusto.es' in response["spaces"]
+        assert 'default' in response["spaces"]
         assert len(response["spaces"]) == 1
     
     def test_join_space(self):
@@ -46,7 +46,7 @@ class TestServerCentralizedKernel(unittest.TestCase):
     
     def test_leave_space(self):
         # remove default space
-        self.kernel.leave_space('http://www.morelab.deusto.es')
+        self.kernel.leave_space('default')
         response = self._get_url('/spaces')
         self.assertFalse( list(response["spaces"]) )
     
