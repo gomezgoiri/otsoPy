@@ -39,6 +39,8 @@ class TestDataAccess(unittest.TestCase):
         self.assertTrue( self.da._defaultSpace in spaces )
         self.assertTrue( "http://www.space1.tk" in spaces )
 
+
+
 class TestStore(unittest.TestCase):
 
     def generate_recognizable_triple(self, id):
@@ -68,7 +70,22 @@ class TestStore(unittest.TestCase):
             self.graphs.append(graph)
         
         self.store = Store()
-
+        
+        self.queries = []
+        self.queries.append( """ select ?o1 where {
+                                    <%s> ?p1 ?o1 .
+                                    <%s> ?p2 ?o2 .
+                                }""" )
+        
+        self.queries.append( """ select ?s1 where {
+                                    ?s1 <%s> ?o1 .
+                                    <%s> ?p2 ?o2 .
+                                }""" )
+        
+        self.queries.append( """ select ?p1 where {
+                                    ?s1 ?p1 <%s> .
+                                    <%s> ?p2 ?o2 .
+                                }""" )
 
     def tearDown(self):
         pass
@@ -116,18 +133,16 @@ class TestStore(unittest.TestCase):
     
     def test_read_uri(self):
         uris = []
-        uris.append( self.store.write(self.graphs[0]) )
-        uris.append( self.store.write(self.graphs[1]) )
-        uris.append( self.store.write(self.graphs[2]) )
+        for g in self.graphs:
+            uris.append( self.store.write( g ) )
         
         for uri, expected in zip(uris, self.graphs):
             graph = self.store.read_uri(uri)
             self.assertTrue( graph.isomorphic(expected) )
             
     def test_read_wildcard(self):
-        self.store.write(self.graphs[0])
-        self.store.write(self.graphs[1])
-        self.store.write(self.graphs[2])
+        for g in self.graphs:
+            self.store.write( g )
         
         i = 0
         for expected in self.graphs:
@@ -141,14 +156,30 @@ class TestStore(unittest.TestCase):
             self.assertTrue( graph.isomorphic(expected) )
             
             # TODO try other combinations?
+            i += 1
+    
+    def test_read_sparql(self):
+        for g in self.graphs:
+            self.store.write( g )
+        
+        i = 0
+        for expected in self.graphs:
+            graph = self.store.read_sparql( self.queries[0] % ( RECOGNIZABLE_SUBJECT%(i), RECOGNIZABLE_SUBJECT%(404) ) )
+            self.assertTrue( graph.isomorphic(expected) )
             
+            graph = self.store.read_sparql( self.queries[1] % ( RECOGNIZABLE_PREDICATE%(i), RECOGNIZABLE_SUBJECT%(404) ) )
+            self.assertTrue( graph.isomorphic(expected) )
+            
+            graph = self.store.read_sparql( self.queries[2] % ( RECOGNIZABLE_OBJECT%(i), RECOGNIZABLE_SUBJECT%(404) ) )
+            self.assertTrue( graph.isomorphic(expected) )
+            
+            # TODO try other combinations?
             i += 1
         
     def test_take_uri(self):
         uris = []
-        uris.append( self.store.write(self.graphs[0]) )
-        uris.append( self.store.write(self.graphs[1]) )
-        uris.append( self.store.write(self.graphs[2]) )
+        for g in self.graphs:
+            uris.append( self.store.write( g ) )
         
         for uri, expected in zip(uris, self.graphs):
             graph = self.store.take_uri(uri)
@@ -159,7 +190,7 @@ class TestStore(unittest.TestCase):
             self.assertEquals( None, graph )        
     
     def assert_takes_wildcard(self, expected_graph, *wildcard):
-        # only valid for wildcards with just match with a graph inside the space
+        # only valid for wildcards which just match with a graph inside the space
         graph = self.store.take_wildcard( *wildcard )
         self.assertTrue( graph.isomorphic(expected_graph) )
         
@@ -168,9 +199,8 @@ class TestStore(unittest.TestCase):
         self.assertEquals( None, graph )
     
     def test_take_wildcard(self):
-        self.store.write(self.graphs[0])
-        self.store.write(self.graphs[1])
-        self.store.write(self.graphs[2])
+        for g in self.graphs:
+            self.store.write( g )
         
         self.assert_takes_wildcard( self.graphs[0], URIRef(RECOGNIZABLE_SUBJECT%(0)), None, None )        
         self.assert_takes_wildcard( self.graphs[1], None, URIRef(RECOGNIZABLE_PREDICATE%(1)), None )
@@ -178,25 +208,70 @@ class TestStore(unittest.TestCase):
             
         # TODO try other combinations
         # TODO try with 2 or more graphs matching a template
+    
+    def assert_takes_sparql(self, expected_graph, query):
+        # only valid for wildcards which just match with a graph inside the space
+        graph = self.store.take_sparql( query )
+        self.assertTrue( graph.isomorphic(expected_graph) )
         
-    def assert_number_responses(self, expected_number_of_responses, *wildcard):
-        self.assertEquals( expected_number_of_responses, len(self.store.query_wildcard(*wildcard)) )        
+        # the second time is not there anymore
+        graph = self.store.take_sparql( query )
+        self.assertEquals( None, graph )
+    
+    def test_take_sparql(self):
+        for g in self.graphs:
+            self.store.write( g )
+        
+        q = """
+            select ?s where {
+                ?s <%s> <%s> .
+                <%s> <%s> <%s> .
+            }
+        """
+        self.assert_takes_sparql( self.graphs[0],
+                                    q % ( RECOGNIZABLE_PREDICATE%(0), RECOGNIZABLE_OBJECT%(0),
+                                          RECOGNIZABLE_SUBJECT%(404), RECOGNIZABLE_PREDICATE%(400),
+                                          RECOGNIZABLE_OBJECT%(401)) )        
+        self.assert_takes_sparql( self.graphs[1],
+                                    q % ( RECOGNIZABLE_PREDICATE%(1), RECOGNIZABLE_OBJECT%(1),
+                                          RECOGNIZABLE_SUBJECT%(404), RECOGNIZABLE_PREDICATE%(401),
+                                          RECOGNIZABLE_OBJECT%(402)) )
+        self.assert_takes_sparql( self.graphs[2],
+                                    q % ( RECOGNIZABLE_PREDICATE%(2), RECOGNIZABLE_OBJECT%(2),
+                                          RECOGNIZABLE_SUBJECT%(404), RECOGNIZABLE_PREDICATE%(400),
+                                          RECOGNIZABLE_OBJECT%(403)) )
+        
+    def assert_number_responses(self, expected_number_of_responses, responses):
+        self.assertEquals( expected_number_of_responses, len(responses) )        
 
     def test_query_wildcard(self):
-        self.store.write(self.graphs[0])
-        self.store.write(self.graphs[1])
-        self.store.write(self.graphs[2])
+        for g in self.graphs:
+            self.store.write( g )
         
-        self.assert_number_responses( 1, URIRef(RECOGNIZABLE_SUBJECT%(0)), None, None )        
-        self.assert_number_responses( 1, None, URIRef(RECOGNIZABLE_PREDICATE%(1)), None )
-        self.assert_number_responses( 1, None, None, URIRef(RECOGNIZABLE_OBJECT%(2)) )
+        self.assert_number_responses( 1, self.store.query_wildcard( URIRef(RECOGNIZABLE_SUBJECT%(0)), None, None ) )
+        self.assert_number_responses( 1, self.store.query_wildcard( None, URIRef(RECOGNIZABLE_PREDICATE%(1)), None ) )
+        self.assert_number_responses( 1, self.store.query_wildcard( None, None, URIRef(RECOGNIZABLE_OBJECT%(2)) ) )
         
-        self.assert_number_responses( 3, URIRef(RECOGNIZABLE_SUBJECT%(404)), None, None )        
-        self.assert_number_responses( 2, None, URIRef(RECOGNIZABLE_PREDICATE%(400)), None )
-        self.assert_number_responses( 1, None, None, URIRef(RECOGNIZABLE_OBJECT%(402)) )
+        self.assert_number_responses( 3, self.store.query_wildcard( URIRef(RECOGNIZABLE_SUBJECT%(404)), None, None ) )
+        self.assert_number_responses( 2, self.store.query_wildcard( None, URIRef(RECOGNIZABLE_PREDICATE%(400)), None ) )
+        self.assert_number_responses( 1, self.store.query_wildcard( None, None, URIRef(RECOGNIZABLE_OBJECT%(402)) ) )
             
         # TODO try other combinations
         # TODO try with 2 or more graphs matching a template
+
+    def test_query_sparql(self):
+        for g in self.graphs:
+            self.store.write( g )
+        
+        q = """construct { <%s> ?p ?o } where {
+                    <%s> ?p ?o .
+                }""" % (RECOGNIZABLE_SUBJECT%(404), RECOGNIZABLE_SUBJECT%(404))
+        self.assert_number_responses( 3, self.store.query_sparql( q ) )
+        
+        q = """construct { ?s <%s> ?o } where {
+                    ?s <%s> ?o .
+                }""" % (RECOGNIZABLE_PREDICATE%(400), RECOGNIZABLE_PREDICATE%(400))
+        self.assert_number_responses( 2, self.store.query_sparql( q ) )
 
 
 if __name__ == "__main__":
